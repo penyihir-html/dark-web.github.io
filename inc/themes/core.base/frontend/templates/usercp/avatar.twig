@@ -1,0 +1,83 @@
+{% extends 'layouts/account.twig' %}
+
+{% block head %}
+    <title>{{ lang.change_avatar }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block accountHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.change_avatar }}</h1>
+    </header>
+{% endblock accountHeader %}
+
+{% block accountBody %}
+    <form action="usercp.php" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+
+        {% include 'usercp/profile_menu.twig' %}
+
+        {{ error|raw }}
+
+        <div class="block block--form form">
+            <section class="section section--form">
+                <h2 class="title title--section">{{ lang.current_avatar }}</h2>
+                <div class="section__container change-avatar">
+                    <div class="row row--form field">
+                        <span class="avatar-container">
+                            {{ render_avatar(url=mybb.user.avatar, alt=mybb.user.username) }}
+                        </span>
+                        <p class="change-avatar__description">{{ lang.avatar_note }}</p>
+                        {% for note in extranotes %}
+                            <p class="change-avatar__description">{{ note }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+            {% if mybb.usergroup.canuploadavatars or mybb.settings.allowremoteavatars %}
+                <section class="section section--form">
+                    <h2 class="title title--section">{{ lang.custom_avatar }}</h2>
+                    <div class="section__container">
+                        {% if mybb.usergroup.canuploadavatars %}
+                            <div class="row row--form field">
+                                <h3 class="field__name">{{ lang.avatar_upload }}</h3>
+                                <p class="field__description">
+                                    {{ lang.avatar_upload_note }}
+                                    {% if mybb.settings.avatarresizing == 'auto' %}
+                                    {{ lang.avatar_auto_resize_note }}
+                                    {% endif %}
+                                </p>
+                                <div class="file-wrapper">
+                                    <input type="file" name="avatarupload" size="25" class="fileupload" />
+                                </div>
+                                {% if mybb.settings.avatarresizing == 'user' %}
+                                <p class="option-field option-field--compact"><label><input type="checkbox" name="auto_resize" value="1" checked="checked" id="auto_resize" /> {{ lang.avatar_auto_resize_option }}</label></p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if mybb.settings.allowremoteavatars %}
+                            <div class="row row--form field">
+                            	<h3 class="field__name"><label for="avatarurl">{{ lang.avatar_url }}</label></h3>
+                            	<p class="field__description">{{ lang.avatar_url_note }}</p>
+                            	<p class="field__description">{{ lang.avatar_url_gravatar|raw }}</p>
+                            	<input type="text" class="textbox" name="avatarurl" id="avatarurl" value="{{ avatarurl }}" />
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+            {% endif %}
+            <div class="form__submit">
+                <button type="submit" class="button button--medium" name="submit">
+                    {{ include('partials/icon.twig', {icon: 'image', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.change_avatar }}</span>
+                </button>
+                {% if mybb.user.avatar %}
+                    <button type="submit" class="button button--medium button--secondary" name="remove" value="remove">
+                        {{ include('partials/icon.twig', {icon: 'times', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.remove_avatar }}</span>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        <input type="hidden" name="action" value="do_avatar" />
+    </form>
+{% endblock accountBody %}

@@ -1,0 +1,112 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.search_results }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ lang.search_results }}</h1>
+        </header>
+        <div class="page-controls page-controls--top">{{ multipage|raw }}</div>
+        <section class="thread-list">
+            {% set ascDesc %}
+                <span class="sort-threads__order">
+                    <a href="{{ results.sorturl|raw }}&amp;sortby={{ results.sortby }}&amp;order={{ results.oppsortnext }}">
+                        {% if results.oppsort == 'asc' %}
+                            {{ include('partials/icon.twig', {icon: 'chevron-circle-up', class: '', title: results.oppsort}, with_context = false) }}
+                        {% else %}
+                            {{ include('partials/icon.twig', {icon: 'chevron-circle-down', class: '', title: results.oppsort}, with_context = false) }}
+                        {% endif %}
+                    </a>
+                </span>
+            {% endset %}
+            <div class="sort-threads">
+                <div class="sort-threads__column sort-threads__column--primary">
+                    <a href="search.php?action=results&amp;sid={{ results.sid }}&amp;sortby=subject&amp;order=asc" class="sort-threads__link">{{ lang.thread }}</a> {% if results.orderarrow.subject %}{{ ascDesc }}{% endif %}
+                    <span class="sort-threads__author"> &mdash;
+                        <a href="search.php?action=results&amp;sid={{ results.sid }}&amp;sortby=starter&amp;order=asc" class="sort-threads__link">{{ lang.author }}</a> {% if results.orderarrow.starter %}{{ ascDesc }}{% endif %}
+                    </span>
+                    <span class="sort-threads__forum"> &mdash;
+                        <a href="search.php?action=results&amp;sid={{ results.sid }}&amp;sortby=forum&amp;order=asc" class="sort-threads__link">{{ lang.forum }}</a> {% if results.orderarrow.forum %}{{ ascDesc }}{% endif %}
+                    </span>
+                </div>
+                <div class="sort-threads__column sort-threads__column--replies">
+                    <a href="search.php?action=results&amp;sid={{ results.sid }}&amp;sortby=replies&amp;order=desc" class="sort-threads__link">{{ lang.replies }}</a> {% if results.orderarrow.replies %}{{ ascDesc }}{% endif %}
+                </div>
+                <div class="sort-threads__column sort-threads__column--latest">
+                    <a href="search.php?action=results&amp;sid={{ results.sid }}&amp;sortby=lastpost&amp;order=desc" class="sort-threads__link">{{ lang.lastpost }}</a> {% if results.orderarrow.lastpost %}{{ ascDesc }}{% endif %}
+                </div>
+                {% if results.show_inline_moderation %}
+                    <span class="sort-threads__column sort-threads__column--checkbox">
+                        <input type="checkbox" name="allbox" onclick="inlineModeration.checkAll(this);" />
+                    </span>
+                {% endif %}
+            </div>
+            {% if results.show_inline_moderation %}
+                <div class="thread-list__select-all" id="selectAllrow">
+                    {{ lang.page_selected }} <a href="javascript:void(0)" onclick='inlineModeration.selectAll(); return false;'>{{ lang.select_all }}</a>
+                </div>
+                <div class="thread-list__select-all" id="allSelectedrow">
+                    {{ lang.all_selected }} <a href="javascript:void(0)" onclick='inlineModeration.clearChecked(); return false;'>{{ lang.clear_selection }}</a>
+                </div>
+            {% endif %}
+            <div class="thread-list__container">
+                {% for thread in threads %}
+                    {% include 'search/results_threads_row.twig' %}
+                {% endfor %}
+            </div>
+            {% if results.show_inline_moderation %}
+                <div class="sort-results">
+                    <h3 class="sort-results__title">{{ lang.inline_thread_moderation }}</h3>
+                    {{ asset('jscripts/inline_moderation.js', static=true) }}
+                    <form action="moderation.php" method="post">
+                        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+                        <input type="hidden" name="fid" value="0" />
+                        <input type="hidden" name="searchid" value="{{ results.sid }}" />
+                        <input type="hidden" name="modtype" value="inlinethread" />
+                        <div class="select-field">
+                            {{ include('partials/icon.twig', {icon: 'sort', class: 'select-field__icon'}, with_context = false) }}
+                            <select name="action">
+                                <optgroup label="{{ lang.standard_mod_tools }}">
+                                    <option value="multiclosethreads">{{ lang.close_threads }}</option>
+                                    <option value="multiopenthreads">{{ lang.open_threads }}</option>
+                                    <option value="multistickthreads">{{ lang.stick_threads }}</option>
+                                    <option value="multiunstickthreads">{{ lang.unstick_threads }}</option>
+                                    <option value="multisoftdeletethreads">{{ lang.soft_delete_threads }}</option>
+                                    <option value="multirestorethreads">{{ lang.restore_threads }}</option>
+                                    <option value="multideletethreads">{{ lang.delete_threads }}</option>
+                                    <option value="multimovethreads">{{ lang.move_threads }}</option>
+                                    <option value="multiapprovethreads">{{ lang.approve_threads }}</option>
+                                    <option value="multiunapprovethreads">{{ lang.unapprove_threads }}</option>
+                                </optgroup>
+                                {% if results.show_inline_moderation %}
+                                    <optgroup label="{{ lang.custom_mod_tools }}">
+                                        {% for tool in results.customthreadtools %}
+                                            <option value="{{ tool.tid }}">{{ tool.name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <input type="submit" class="button button--inline" name="go" value="{{ lang.inline_go }} ({{ results.inlinecount }})" id="inline_go" /> {# TO DO: Change to button with icon (JS for counter must be fixed first) #}
+                        <input type="button" onclick="inlineModeration.clearChecked();" value="{{ lang.clear }}" class="button button--secondary button--inline" />
+                        <input type="hidden" name="url" value="{{ results.return_url }}" />
+                        <input type="hidden" name="inlinetype" value="search" />
+                    </form>
+                    <script type="text/javascript">
+                    <!--
+                        var go_text = "{{ lang.inline_go }}";
+                        var all_text = "{{ results.threadcount }}";
+                        var inlineType = "search";
+                        var inlineId = '{{ results.sid }}';
+                    // -->
+                    </script>
+                </div>
+            {% endif %}
+        </section>
+
+        {{ multipage|raw }}
+    </div>
+{% endblock body %}

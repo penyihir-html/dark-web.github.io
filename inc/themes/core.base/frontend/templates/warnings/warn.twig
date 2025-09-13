@@ -1,0 +1,189 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.warn_user }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ lang.warn_user }}</h1>
+            <p class="page-description">{{ lang.warn_user_desc }}</p>
+        </header>
+        {% if warnings %}
+            <section class="block">
+                <h1 class="title title--major">{{ lang.existing_post_warnings }}</h1>
+                {% for warning in warnings %}
+                    {% include 'warnings/warning_row.twig' %}
+                {% endfor %}
+            </section>
+        {% endif %}
+        {{ warn_errors|raw }}
+        <form action="warnings.php" method="post" name="input">
+            <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+            <input type="hidden" name="action" value="do_warn" />
+            <input type="hidden" name="uid" value="{{ user.uid }}" />
+            <div class="block block--form form">
+                <section class="section section--form">
+                    <h2 class="title title--section">{{ lang.warn_user }}</h2>
+                    <div class="section__container">
+                        <div class="row row--form field">
+                            <h3 class="field__name">{{ lang.username }}</h3>
+                            <p class="field__value">{{ user.user_link|raw }}</p>
+                        </div>
+                        {% if post.pid %}
+                            <div class="row row--form field">
+                                <h3 class="field__name">{{ lang.post }}</h3>
+                                <p class="field__value"><input type="hidden" name="pid" value="{{ post.pid }}" /><a href="{{ post.link }}">{{ post.subject }}</a></p>
+                            </div>
+                        {% endif %}
+                        <div class="row row--form field">
+                            <h3 class="field__name"><label for="notes">{{ lang.warning_note }}</label></h3>
+                            <textarea class="textarea" name="notes" id="notes" cols="60" rows="4">{{ type_checked.notes }}</textarea>
+                        </div>
+                        <div class="row row--form field">
+                            <h3 class="field__name">{{ lang.warning_type }}</h3>
+                            <script type="text/javascript">
+                            // <!--
+                                function checkType(id)
+                                {
+                                    var checked = '';
+
+                                  $('.option-field__input--types').each(function(e, val)
+                                    {
+                                        if($(this).prop('checked') == true)
+                                        {
+                                            checked = $(this).val();
+                                        }
+                                    });
+                                    $('.types').each(function(e)
+                                    {
+                                        $(this).hide();
+                                    });
+                                    if($('#type_'+checked))
+                                    {
+                                        $('#type_'+checked).show();
+                                    }
+                                }
+                            // -->
+                            </script>
+                            {% for type in types %}
+                                <div class="option-field">
+                                    <input type="radio" class="option-field__input option-field__input--types" name="type" id="type_input_{{ type.tid }}" value="{{ type.tid }}" {{ type_checked.tid }} onclick="checkType();" />
+                                    <h4 class="option-field__name"><label for="type_input_{{ type.tid }}">{{ type.title }} {{ trans('warning_points', type.points) }}</label></h4>
+                                    <div id="type_{{ type.tid }}" class="types section section--inline">
+                                        <div class="row row--form field">
+                                            <h5 class="field__name">{{ lang.new_warning_level }} {{ type.new_warning_level }}%</h5>
+                                            <div class="warning-level">
+                                                <div class="warning-level__bar warning-level__bar--total" style="width: {{ user.currentlevel + type.level_diff }}%">
+                                                    <div class="warning-level__bar warning-level__bar--current" style="width: {{ (user.currentlevel / (user.currentlevel + type.level_diff)) * 100 }}%"></div>
+                                                </div>
+                                            </div>
+                                            {% if type.action %}
+                                                <p class="field__description field__description--below">{{ lang.result }} {{ type.action.friendly_action }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            {% if mybb.settings.allowcustomwarnings %}
+                                <div class="option-field">
+                                    <input type="radio" class="option-field__input option-field__input--types" name="type" id="type_input_custom" value="custom" {{ type_checked.custom }} class="types_check" onclick="checkType();" />
+                                    <h4 class="option-field__name"><label for="type_input_custom">{{ lang.custom }}</label></h4>
+                                    <div id="type_custom" class="types section section--inline">
+                                        <div class="row row--form field">
+                                            <h5 class="field__name"><label for="custom_reason">{{ lang.reason }}</label></h5>
+                                            <input type="text" class="textbox" name="custom_reason" id="custom_reason" maxlength="120" value="{{ type_checked.custom_reason }}" />
+                                        </div>
+                                        <div class="row row--form field">
+                                            <h5 class="field__name"><label for="custom_points">{{ lang.points }}</label></h5>
+                                            <input type="text" class="textbox textbox--small" name="custom_points" id="custom_points" value="{{ type_checked.custom_points }}" />
+                                        </div>
+                                        <div class="row row--form field">
+                                            <h5 class="field__name"><label for="custom_expires">{{ lang.expires }}</label></h5>
+                                            <input type="text" class="textbox textbox--small" name="expires" size="2" value="{{ type_checked.expires }}" />
+                                            <div class="select-field">
+                                                {{ include('partials/icon.twig', {icon: 'sort', class: 'select-field__icon'}, with_context = false) }}
+                                                <select name="expires_period">
+                                                    <option value="hours" {{ type_checked.hours }}>{{ lang.hour_or_hours }}</option>
+                                                    <option value="days" {{ type_checked.days }}>{{ lang.day_or_days }}</option>
+                                                    <option value="weeks" {{ type_checked.weeks }}>{{ lang.week_or_weeks }}</option>
+                                                    <option value="months" {{ type_checked.months }}>{{ lang.month_or_months }}</option>
+                                                    <option value="never" {{ type_checked.never }}>{{ lang.never }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            <script type="text/javascript">
+                            // <!--
+                                checkType();
+                            // -->
+                            </script>
+                        </div>
+                    </div>
+                </section>
+                {% if pm.haspermission == true %}
+                    <section class="section section--form">
+                        <h2 class="title title--section">{{ lang.send_pm }}</h2>
+                        <div class="section__container">
+                            <div class="row row--form row--no-border field">
+                                <p class="option-field option-field--compact">
+                                    <label><input type="checkbox" class="checkbox" value="1" name="send_pm" id="send_pm" onclick="togglePM();" style="vertical-align: middle;" {{ type_checked.send_pm_checked }} /> {{ lang.send_user_warning_pm }}</label>
+                                </p>
+                            </div>
+                            <script type="text/javascript">
+                            // <!--
+                                function togglePM()
+                                {
+                                    if($('#send_pm').prop('checked') == true)
+                                    {
+                                        $('#pm_input').show();
+                                        $('#pm_smilie_insert').show();
+                                    }
+                                    else
+                                    {
+                                        $('#pm_input').hide();
+                                    }
+                                }
+                            // -->
+                            </script>
+
+                            <div id="pm_input">
+                                <div class="row row--form row--border-top field">
+                                    <h3 class="field__name"><label for="pm_subject">{{ lang.send_pm_subject }}</label></h3>
+                                    <input type="text" class="textbox" name="pm_subject" size="40" maxlength="85" value="{{ type_checked.pm_subject }}" />
+                                </div>
+                                <div class="row row--form {% if mybb.settings.allowanonwarningpms == false %}row--no-border{% endif %} field">
+                                    <h3 class="field__name"><label for="message">{{ lang.send_pm_message }}</label></h3>
+                                    <textarea name="pm_message" id="message" rows="20" cols="70">{{ type_checked.message }}</textarea>
+                                    {{ pm.codebuttons|raw }}
+                                </div>
+                                {% if mybb.settings.allowanonwarningpms %}
+                                    <div class="row row--form field">
+                                        <h3 class="field__name">{{ lang.send_pm_options }}</h3>
+                                        <p class="option-field option-field--compact"><label><input type="checkbox" class="checkbox" name="pm_anonymous" value="1"{{ pm.anonymous_checked }} />&nbsp;{{ lang.send_pm_options_anonymous|raw }}</label></p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <script type="text/javascript">
+                            <!--
+                            $(function() {
+                                togglePM();
+                            });
+                            // -->
+                            </script>
+                        </div>
+                    </section>
+                {% endif %}
+                <div class="form__submit">
+                    <button type="submit" class="button button--medimu">
+                        {{ include('partials/icon.twig', {icon: 'exclamation-triangle', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.warn_user }}</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock body %}

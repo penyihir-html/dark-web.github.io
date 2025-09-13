@@ -1,0 +1,22 @@
+<div class="row row--simple-columns warning-log">
+    <div class="row__primary">
+        <div class="warning-log__warning">{{ warning.warning_type }} {{ trans('warning_points', warning.points) }}</div>
+        {% if warning.post_subject %}
+            <div class="warning-log__post">{{ lang.warning_for_post }} <a href="{{ warning.post_link|raw }}#pid{{ warning.pid }}">{{ warning.post_subject }}</a></div>
+        {% endif %}
+        <div class="warning-log__expiry-date">
+            {{ lang.expires }}:
+            {{ warning.expires }}
+        </div>
+    </div>
+    <div class="row__secondary">
+        <div class="warning-log__details">
+            <a href="warnings.php?action=view&amp;wid={{ warning.wid }}" class="button">
+                {{ include('partials/icon.twig', {icon: 'info-circle', class: 'button__icon'}, with_context = false) }}
+                <span class="button__text">{{ lang.view }}</span>
+            </a>
+        </div>
+        <div class="warning-log__issued_by">{{ lang.issued_by }} {{ warning.issuedby|raw }}</div>
+        <div class="warning-log__issued-date">{{ warning.date_issued|raw }}</div>
+    </div>
+</div>

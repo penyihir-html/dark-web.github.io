@@ -1,0 +1,101 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.warning_details }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% if warning.status == lang.warning_active %}
+    {% set tag = 'tag--good' %}
+{% elseif warning.status == lang.already_expired or warning.status == lang.warning_revoked %}
+    {% set tag = 'tag--medium' %}
+{% else %}
+    {% set tag = '' %}
+{% endif %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <span class="tag tag--float {{ tag }}">{{ warning.status }}</span>
+            <h1 class="title title--page">{{ lang.warning_details }}</h1>
+        </header>
+        <div class="block block--container">
+            <ul class="list list--divided list--stats">
+                <li class="list__item">
+                    <span class="list__field">{{ lang.username }}</span>
+                    <span class="list__value">{{ user.user_link|raw }}</span>
+                </li>
+                {% if warning.post_subject %}
+                    <li class="list__item">
+                        <span class="list__field">{{ lang.post }}</span>
+                        <span class="list__value"><a href="{{ warning.post_link|raw }}#pid{{ warning.pid }}">{{ warning.post_subject }}</a></span>
+                    </li>
+                {% endif %}
+                <li class="list__item">
+                    <span class="list__field">{{ lang.warning }}</span>
+                    <span class="list__value">{{ warning.warning_type }} {{ trans('warning_points', warning.points) }}</span>
+                </li>
+                <li class="list__item">
+                    <span class="list__field">{{ lang.date_issued }}</span>
+                    <span class="list__value">{{ warning.date_issued|raw }}</span>
+                </li>
+                <li class="list__item">
+                    <span class="list__field">{{ lang.issued_by }}</span>
+                    <span class="list__value">{{ warning.issuedby|raw }}</span>
+                </li>
+                <li class="list__item">
+                    <span class="list__field">{{ lang.expiry_date }}</span>
+                    <span class="list__value">{{ warning.expires }} {{ warning.revoked_date }}</span>
+                </li>
+                <li class="list__item">
+                    <span class="list__field">{{ lang.details_warning_note }}</span>
+                    <span class="list__value">{{ warning.notes|nl2br }}</span>
+                </li>
+            </ul>
+        </div>
+        {% if warning.daterevoked %}
+            <section class="block block--container">
+                <h1 class="title title--minor">{{ lang.warning_is_revoked }}</h1>
+                <ul class="list list--divided list--stats">
+                    <li class="list__item">
+                        <span class="list__field">{{ lang.revoked_by }}</span>
+                        <span class="list__value">{{ revoked_user.profile|raw }}</span>
+                    </li>
+                    <li class="list__item">
+                        <span class="list__field">{{ lang.date_revoked }}</span>
+                        <span class="list__value">{{ warning.daterevoked|raw }}</span>
+                    </li>
+                    <li class="list__item">
+                        <span class="list__field">{{ lang.details_reason }}</span>
+                        <span class="list__value">{{ warning.revokereason|nl2br }}</span>
+                    </li>
+                </ul>
+            </section>
+        {% else %}
+            {{ warn_errors|raw }}
+            <form action="warnings.php" method="post" name="input">
+                <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+                <input type="hidden" name="action" value="do_revoke" />
+                <input type="hidden" name="wid" value="{{ warning.wid }}" />
+
+                <section class="block block--form form">
+                    <div class="section section--form">
+                        <h2 class="title title--section">{{ lang.revoke_warning }}</h2>
+                        <div class="section__container">
+                            <div class="row row--form field">
+                                <h3 class="field__name"><label for="reason">{{ lang.reason }}</label></h3>
+                                <p class="field__description">{{ lang.revoke_warning_desc }}</p>
+                                <textarea name="reason" id="reason" cols="60" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form__submit">
+                        <button class="button button--medium" type="submit">
+                            {{ include('partials/icon.twig', {icon: 'times', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.revoke_warning }}</span>
+                        </button>
+                    </div>
+                </section>
+            </form>
+        {% endif %}
+    </div>
+{% endblock body %}

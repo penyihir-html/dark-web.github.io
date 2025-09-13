@@ -1,0 +1,14 @@
+<div class="compose__smilies">
+    <div class="smilie-inserter">
+        <h3 class="smilie-inserter__title">{{ lang.smilieinsert }}</h3>
+        <div class="smilie-inserter__grid">
+            {% for smilie in smilies %}
+                {# TO DO: REMOVE mybb.settings.smilieinsertercols SETTING #}
+                <div class="smilie-inserter__smilie">{% include '@parser/mycodes/smilie.twig' %}</div>
+            {% endfor %}
+        </div>
+        {% if mybb.settings.smilieinsertertot < smiliecount %}
+            <div class="smilie-inserter__more"><a href="javascript:void(0)" onclick="MyBB.popupWindow('/misc.php?action=smilies&amp;popup=true&amp;editor=MyBBEditor&amp;modal=1'); return false;">{{ lang.smilieinsert_getmore }}</a></div>
+        {% endif %}
+    </div>
+</div>

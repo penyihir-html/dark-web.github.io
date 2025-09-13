@@ -1,0 +1,27 @@
+{% extends 'layouts/account.twig' %}
+
+{% block head %}
+    <title>{{ lang.forum_subscriptions }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block accountHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.forum_subscriptions }}</h1>
+    </header>
+{% endblock accountHeader %}
+
+{% block accountBody %}
+
+    {% include 'usercp/subscribed_menu.twig' %}
+
+    <section class="block block--container">
+        <div class="forum-list forum-list--full-width">
+        {% for forum in forums %}
+            {% include 'usercp/subscribed_forums/row.twig' %}
+        {% else %}
+            <div class="alert alert--no-results alert--aligned-block">
+                {{ lang.no_forum_subscriptions|raw }}
+            </div>
+        {% endfor %}
+    </section>
+{% endblock accountBody %}

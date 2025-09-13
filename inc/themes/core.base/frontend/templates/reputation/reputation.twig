@@ -1,0 +1,124 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ trans('reputation_report', user.username) }} - {{ mybb.settings.bbname }}</title>
+
+    <script type="text/javascript">
+    <!--
+        var delete_reputation_confirm = "{{ lang.delete_reputation_confirm }}";
+    // -->
+    </script>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ trans('reputation_report', user.username) }}</h1>
+        </header>
+        {% if user.show_add_reputation %}
+            <div class="page-controls page-controls--top">
+                <div class="page-buttons">
+                    <a href="javascript:void(0)" onclick="MyBB.reputation({{ user.uid }}); return false;" class="button button--full-width">
+                        {{ include('partials/icon.twig', {icon: 'thumbs-up', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.rate_user }}</span>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        <section class="block block--container">
+            <h1 class="title visually-hidden">{{ lang.summary }}</h1>
+            <div class="reputation-summary">
+                <div class="reputation-summary__block reputation-summary__block--stats">
+                    <ul class="list list--stats">
+                        <li class="list__item">
+                            <h2 class="title">{{ user.user_name|raw }}</h2>
+                            {{ user.user_title }}
+                        </li>
+                        <li class="list__item">
+                            <span class="list__field">{{ lang.total_reputation }}</span>
+                            <span class="list__value"><span class="repbox {{ user.total_class }}">{{ user.rep_total }}</span></span>
+                        </li>
+                        <li class="list__item">
+                            <span class="list__field">{{ lang.reputation_members }}</span>
+                            <span class="list__value">{{ user.rep_members }}</span>
+                        </li>
+                        <li class="list__item">
+                            <span class="list__field">{{ lang.reputation_posts }}</span>
+                            <span class="list__value">{{ user.rep_posts }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="reputation-summary__block reputation-summary__block--counts">
+                    <table class="reputation-table" cellspacing="0" cellpadding="0">
+                        <tr class="reputation-table__row reputation-table__row--header">
+                            <td class="reputation-table__cell">&nbsp;</td>
+                            <td class="reputation-table__cell"><span class="reputation_positive">{{ lang.positive_count }}</span></td>
+                            <td class="reputation-table__cell"><span class="reputation_neutral">{{ lang.neutral_count }}</span></td>
+                            <td class="reputation-table__cell"><span class="reputation_negative">{{ lang.negative_count }}</span></td>
+                        </tr>
+                        <tr class="reputation-table__row">
+                            <td class="reputation-table__cell reputation-table__cell--legend">{{ lang.last_week }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.positive_week }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.neutral_week }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.negative_week }}</td>
+                        </tr>
+                        <tr class="reputation-table__row">
+                            <td class="reputation-table__cell reputation-table__cell--legend">{{ lang.last_month }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.positive_month }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.neutral_month }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.negative_month }}</td>
+                        </tr>
+                        <tr class="reputation-table__row">
+                            <td class="reputation-table__cell reputation-table__cell--legend">{{ lang.last_6months }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.positive_6months }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.neutral_6months }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.negative_6months }}</td>
+                        </tr>
+                        <tr class="reputation-table__row reputation-table__row--footer">
+                            <td class="reputation-table__cell reputation-table__cell--legend">{{ lang.all_time }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.positive_count }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.neutral_count }}</td>
+                            <td class="reputation-table__cell reputation-table__cell--count">{{ user.negative_count }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <section class="block">
+            <h1 class="title title--major">{{ lang.comments }}</h1>
+            <div class="reputation-ratings">
+                {% for reputation_vote in reputation_votes %}
+                    {% include 'reputation/reputation_vote.twig' %}
+                {% else %}
+                    <div class="alert alert--no-results">{{ lang.no_reputation_votes }}</div>
+                {% endfor %}
+            </div>
+            <div class="sort-results">
+                <form action="reputation.php" method="get">
+                    <input type="hidden" name="uid" value="{{ user.uid }}" />
+                    <div class="select-field">
+                        {{ include('partials/icon.twig', {icon: 'sort', class: 'select-field__icon'}, with_context = false) }}
+                        <select name="show">
+                            <option value="all"{% if select.show.all %} selected="selected"{% endif %}>{{ lang.show_all }}</option>
+                            <option value="positive"{% if select.show.positive %} selected="selected"{% endif %}>{{ lang.show_positive }}</option>
+                            <option value="neutral"{% if select.show.neutral %} selected="selected"{% endif %}>{{ lang.show_neutral }}</option>
+                            <option value="negative"{% if select.show.negative %} selected="selected"{% endif %}>{{ lang.show_negative }}</option>
+                        </select>
+                    </div>
+                    <div class="select-field">
+                        {{ include('partials/icon.twig', {icon: 'sort', class: 'select-field__icon'}, with_context = false) }}
+                        <select name="sort">
+                            <option value="dateline"{% if select.sort.last_updated %} selected="selected"{% endif %}>{{ lang.sort_updated }}</option>
+                            <option value="username"{% if select.sort.username %} selected="selected"{% endif %}>{{ lang.sort_username }}</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="button button--inline">
+                        {{ include('partials/icon.twig', {icon: 'random', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.sort_ratings }}</span>
+                    </button>
+                </form>
+            </div>
+        </section>
+        {{ multipage|raw }}
+    </div>
+{% endblock body %}

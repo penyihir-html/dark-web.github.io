@@ -1,0 +1,138 @@
+{% extends 'layouts/account.twig' %}
+
+{% block head %}
+    <title>{{ lang.group_memberships }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block accountHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.group_memberships }}</h1>
+    </header>
+{% endblock accountHeader %}
+
+{% block accountBody %}
+    {% if leadinggroups %}
+        <section class="block">
+            <h1 class="title title--major">{{ lang.usergroups_leader }}</h1>
+            {% for usergroup in leadinggroups %}
+                <div class="row row--simple-columns user-group">
+                    <div class="row__primary">
+                        <h2 class="user-group__name">{{ usergroup.title }}</h2>
+                        <p class="user-group__description">{{ lang.usergroup_members }}: {{ usergroup.users }}</p>
+                        {% if usergroup.type == 4 %}
+                            <p class="user-group__description">{{ lang.join_requests }}: {{usergroup.joinrequests }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="row__controls">
+                        {% if usergroup.joinrequests > 0 and usergroup.canmanagerequests %}
+                            <a href="managegroup.php?action=joinrequests&amp;gid={{ usergroup.gid }}" class="button button--small button--secondary">
+                                {{ include('partials/icon.twig', {icon: 'users-cog', class: 'button__icon'}, with_context = false) }}
+                                <span class="button__text">{{ lang.view_requests }}</span>
+                            </a>
+                        {% endif %}
+                        <a href="managegroup.php?gid={{ usergroup.gid }}" class="button button--small button--secondary">
+                            {{ include('partials/icon.twig', {icon: 'users', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.view_members }}</span>
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if joinablegroups %}
+        <section class="block">
+            <h1 class="title title--major">{{ lang.usergroups_joinable }}</h1>
+            {% for usergroup in joinablegroups %}
+                <div class="row row--simple-columns user-group">
+                    <div class="row__primary">
+                        <h2 class="user-group__name">{{ usergroup.title }}</h2>
+                        {% if usergroup.description %}
+                            <p class="user-group__description">{{ usergroup.description }}</p>
+                        {% endif %}
+                        {% if usergroup.leaders %}
+                            <p class="user-group__leaders">
+                                {{ lang.usergroup_leaders }}
+                                {% for leader in usergroup.leaders %}
+                                    {{ leader|raw }}{% if not loop.last %}{{ lang.comma }} {% endif %}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                        <p class="user-group__message">
+                            {% if usergroup.type == 4 %}
+                                {{ lang.usergroup_joins_moderated }}
+                            {% elseif usergroup.type == 5 %}
+                                {{ lang.usergroup_joins_invite }}
+                            {% else %}
+                                {{ lang.usergroup_joins_anyone }}
+                            {% endif %}
+                            {% if usergroup.joinlink %}
+                                {{ usergroup.joinlink|raw }}
+                            {% endif %}
+                            {% if usergroup.invited %}
+                                {{ lang.pending_invitation }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="row__controls">
+                        {% if usergroup.invited %}
+                            <a href="usercp.php?action=usergroups&amp;acceptinvite={{ usergroup.gid }}&amp;my_post_key={{ mybb.post_code }}" class="button button--small button--success">
+                                {{ include('partials/icon.twig', {icon: 'check', class: 'button__icon'}, with_context = false) }}
+                                <span class="button__text">{{ lang.accept_invite }}</span>
+                            </a>
+                        {% endif %}
+                        {% if not usergroup.joinlink and not usergroup.invited and usergroup.type != 5 %}
+                            <a href="usercp.php?action=usergroups&amp;joingroup={{ usergroup.gid }}&amp;my_post_key={{ mybb.post_code }}" class="button button--small button--secondary">
+                                {{ include('partials/icon.twig', {icon: 'user-plus', class: 'button__icon'}, with_context = false) }}
+                                <span class="button__text">{{ lang.join_group }}</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    {% if groupsmemberof %}
+        <section class="block">
+            <h1 class="title title--major">{{ lang.usergroups_memberof }}</h1>
+            {% for usergroup in groupsmemberof %}
+                <div class="row row--simple-columns user-group">
+                    <div class="row__primary">
+                        <h2 class="user-group__name">{{ usergroup.title }}</h2>
+                        {% if usergroup.candisplaygroup and usergroup.gid == mybb.user.displaygroup %}
+                            <span class="user-group__display-group">({{ lang.display_group }})</span>
+                        {% endif %}
+                        {% if usergroup.description %}
+                            <p class="user-group__description">{{ usergroup.description }}</p>
+                        {% endif %}
+                        {% if usergroup.usertitle %}
+                            <p class="user-group__user-title">{{ lang.usertitle }}: {{ usergroup.usertitle }}</p>
+                        {% endif %}
+                        {% if usergroup.primary %}
+                            <p class="user-group__message">{{ lang.usergroup_leave_primary }}</p>
+                        {% elseif groupleader[usergroup.gid] %}
+                            <p class="user-group__message">{{ lang.usergroup_leave_leader }}</p>
+                        {% elseif usergroup.type not in [3, 4, 5] %}
+                            <p class="user-group__message">{{ lang.usergroup_cannot_leave }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="row__controls">
+                        {% if usergroup.candisplaygroup and usergroup.gid != mybb.user.displaygroup %}
+                            <a href="usercp.php?action=usergroups&amp;displaygroup={{ usergroup.gid }}&amp;my_post_key={{ mybb.post_code }}" class="button button--small button--secondary">
+                                {{ include('partials/icon.twig', {icon: 'user-edit', class: 'button__icon'}, with_context = false) }}
+                                <span class="button__text">{{ lang.set_as_display_group }}</span>
+                            </a>
+                        {% endif %}
+                        {% if not usergroup.primary and not groupleader[usergroup.gid] and usergroup.type in [3, 4, 5] %}
+                            <a href="usercp.php?action=usergroups&amp;leavegroup={{ usergroup.gid }}&amp;my_post_key={{ mybb.post_code }}" class="button button--small button--danger">
+                                {{ include('partials/icon.twig', {icon: 'sign-out-alt', class: 'button__icon'}, with_context = false) }}
+                                <span class="button__text">{{ lang.usergroup_leave }}</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+{% endblock accountBody %}

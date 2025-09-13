@@ -1,0 +1,67 @@
+{% extends 'layouts/account.twig' %}
+
+{% block head %}
+    <title>{{ lang.attachments_manager }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block accountHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.attachments_manager }}</h1>
+        <p class="page-description">{{ usage_note }}</p>
+    </header>
+{% endblock accountHeader %}
+
+{% block accountBody %}
+    <form action="usercp.php" method="post" name="attachmentsmanager">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        <section class="block">
+            <div class="container container--small container--adjacent">
+                <div class="select-all">
+                    <input type="checkbox" name="allbox" class="checkbox checkall" />
+                </div>
+            </div>
+            <div class="results">
+                {% for attachment in attachments %}
+                    {% include 'usercp/attachments/row.twig' %}
+                {% else %}
+                    <div class="alert alert--no-results">{{ lang.no_attachments }}</div>
+                {% endfor %}
+            </div>
+            {% if attachments %}
+                <div class="sort-results">
+                    <input type="hidden" name="action" value="do_attachments" />
+                    <button type="submit" class="button">
+                        {{ include('partials/icon.twig', {icon: 'trash', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.delete_attachments }}</span>
+                    </button>
+                </div>
+            {% endif %}
+        </section>
+    </form>
+    {{ multipage|raw }}
+    <section class="block block--container">
+        <h1 class="title title--sidebar">{{ lang.attachments_stats }}</h1>
+        <ul class="list list--stats list--divided">
+            <li class="list__item">
+                <span class="list__field">{{ lang.attachstats_attachs }}</span>
+                <span class="list__value">{{ total_attachments }}</span>
+            </li>
+            <li class="list__item">
+                <span class="list__field">{{ lang.attachstats_spaceused }}</span>
+                <span class="list__value">{{ friendly_usage }} {{ (percent) }}</span>
+            </li>
+            <li class="list__item">
+                <span class="list__field">{{ lang.attachstats_quota }}</span>
+                <span class="list__value">{{ attach_quota }}</span>
+            </li>
+            <li class="list__item">
+                <span class="list__field">{{ lang.attachstats_totaldl }}</span>
+                <span class="list__value">{{ total_downloads }}</span>
+            </li>
+            <li class="list__item">
+                <span class="list__field">{{ lang.attachstats_bandwidth }}</span>
+                <span class="list__value">{{ bandwidth }}</span>
+            </li>
+        </ul>
+    </section>
+{% endblock %}
