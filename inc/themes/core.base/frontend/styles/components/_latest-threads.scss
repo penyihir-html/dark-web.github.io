@@ -1,0 +1,31 @@
+.latest-threads {
+
+    &__title {
+        margin: 0;
+        font-size: 1.1em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__forum,
+    &__last-post,
+    &__stats {
+        margin: 0;
+        font-size: 0.9em;
+        line-height: 22px;
+        color: $alt-font-color-2;
+
+        a:link,
+        a:visited {
+            color: $alt-font-color-1;
+        }
+    }
+
+    &__author {
+
+        &:after {
+                content: ",";
+        }
+    }
+}
