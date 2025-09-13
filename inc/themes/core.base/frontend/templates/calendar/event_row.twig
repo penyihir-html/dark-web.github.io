@@ -1,0 +1,67 @@
+<section class="block">
+    <h1 class="title title--major title--separation">{{ event.name }}</h1>
+    <div class="post post--no-avatar">
+        <div class="post__meta">
+            <h3 class="post__author">{{ event.profilelink|raw }}</h3>
+            <span class="post__date">{{ event.time_period }}</span>
+            {# TO DO: incorporate?
+            <span class="smalltext">
+                {{ event.usertitle }}<br />
+                {% if event.starimage and event.stars %}
+                    {% apply spaceless %}
+                        {% for star in range(1, event.stars) %}
+                            <img src="{{ event.starimage }}" border="0" alt="*" />
+                        {% endfor %}
+                    {% endapply %}
+                    <br />
+                {% endif %}
+            </span>#}
+        </div>
+        <div class="post__body scaleimages {{ event.event_class }}">
+            {{ event.description|raw }}
+            {% if event.repeats %}
+                <div class="post__signature">{{ lang.repeats }} {{ event.repeats }}</div>
+            {% endif %}
+        </div>
+        {% if event.can_edit == true or calendar_permissions.canmoderateevents %}
+            <div class="post__foot post__foot--controls">
+                {% if event.can_edit == true %}
+                <div class="post-controls post-controls--primary">
+                    <a href="calendar.php?action=editevent&amp;eid={{ event.eid }}" class="post-control post-control--edit">
+                        {{ include('partials/icon.twig', {icon: 'edit', class: 'post-control__icon fa-fw'}, with_context = false) }}
+                        <span class="post-control__text">{{ lang.postbit_button_edit }}</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="MyBB.deleteEvent({{ event.eid }}); return false;" class="post-control post-control--delete">
+                        {{ include('partials/icon.twig', {icon: 'trash', class: 'post-control__icon fa-fw'}, with_context = false) }}
+                        <span class="post-control__text">{{ lang.postbit_button_qdelete }}</span>
+                    </a>
+                </div>
+                {% endif %}
+                {% if calendar_permissions.canmoderateevents %}
+                    <div class="post-controls post-controls--secondary post-options">
+                        <input type="checkbox" class="post-options__checkbox" id="post_options_{{ event.eid }}">
+                        <label for="post_options_{{ event.eid }}" class="post-control post-control--options post-options__control" title="{{ lang.moderator_options }}">
+                            {{ include('partials/icon.twig', {icon: 'ellipsis-v', class: 'post-control__icon fa-fw'}, with_context = false) }}
+                            <span class="visually-hidden">{{ lang.moderator_options }}</span>
+                        </label>
+                        <span class="post-options__list" id="post_options2_{{ event.eid }}">
+                            <a href="calendar.php?action={{ event.approve_value }}&amp;eid={{ event.eid }}&amp;my_post_key={{ mybb.post_code }}" title="{{ event.approve }}" class="post-control post-control--{{ event.approve_value }}">
+                                {% if event.approve_value == 'approve' %}
+                                    {% set approve_icon = 'check' %}
+                                {% else %}
+                                    {% set approve_icon = 'times' %}
+                                {% endif %}
+                                {{ include('partials/icon.twig', {icon: approve_icon, class: 'post-control__icon fa-fw'}, with_context = false) }}
+                                <span class="post-control__text">{{ event.approve }}</span>
+                            </a>
+                            <a href="calendar.php?action=move&amp;eid={{ event.eid }}&amp;my_post_key={{ mybb.post_code }}" title="{{ lang.move_event }}" class="post-control post-control--move">
+                                {{ include('partials/icon.twig', {icon: 'arrow-right', class: 'post-control__icon fa-fw'}, with_context = false) }}
+                                <span class="post-control__text">{{ lang.move_event }}</span>
+                            </a>
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>

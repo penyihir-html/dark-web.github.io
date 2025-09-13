@@ -1,0 +1,211 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ trans('members_of', usergroup.title) }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ trans('members_of', usergroup.title) }}</h1>
+            <p class="page-description">{{ usergroup.usergrouptype }}</p>
+        </header>
+    {% if usergroup.pendingrequests %}
+        <div class="alert alert--danger">
+            {{ include('partials/icon.twig', {icon: 'exclamation-triangle', class: 'alert__icon'}, with_context = false) }}
+            <div class="alert__message">
+                <h2 class="alert__title"><a href="managegroup.php?action=joinrequests&amp;gid={{ usergroup.gid }}">{{ lang.pending_requests }}</a></h2>
+                <p class="alert__description">{{ trans('num_requests_pending', usergroup.num_requests) }}</p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if usergroup.leaders %}
+        <div class="container container--small">
+            {{ lang.group_leaders }}:
+            {% for leader in leaders %}
+                {{ leader.profilelink|raw }}{% if not loop.last %}{{ lang.comma }}{% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+    {{ multipage|raw }}
+    <section class="block">
+        <form method="post" action="managegroup.php">
+            <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+            <input type="hidden" name="action" value="do_manageusers" />
+            <input type="hidden" name="gid" value="{{ usergroup.gid }}" />
+            <h1 class="title title--major">{{ trans('members_of', usergroup.title) }}</h1>
+            <div class="user-list user-list--has-title user-list--has-footer">
+                {% for user in users %}
+                    <div class="user-list__user">
+                        {% if groupleader.canmanagemembers %}
+                            <span class="user-list__checkbox">
+                                <input type="checkbox" class="checkbox" name="removeuser[{{ user.uid }}]" value="{{ user.uid }}"{{ user.disabled }} />
+                            </span>
+                        {% endif %}
+                        <h2 class="user-list__username">{{ user.profilelink|raw }} <span class="user-list__user-info">{{ user.leader }}</span></h2>
+                        <ul class="list list--stats list--user">
+                            <li class="list__item">
+                                <span class="list__field">{{ lang.reg_date }}</span>
+                                <span class="list__value">{{ user.reg_date|raw }}</span>
+                            </li>
+                            <li class="list__item">
+                                <span class="list__field">{{ lang.post_count }}</span>
+                                <span class="list__value">{{ user.postnum }}</span>
+                            </li>
+                        </ul>
+                        <div class="user-list__buttons">
+                            {% if user.showemail %}
+                                <a href="member.php?action=emailuser&amp;uid={{ user.uid }}" title="{{ lang.postbit_email }}" class="button button--secondary button--small">
+                                    {{ include('partials/icon.twig', {icon: 'at', class: 'button__icon'}, with_context = false) }}
+                                    <span class="button__text">{{ lang.postbit_button_email }}</span>
+                                </a>
+                            {% endif %}
+                            {% if user.showpm %}
+                                <a href="private.php?action=send&amp;uid={{ user.uid }}" title="{{ lang.postbit_pm }}" class="button button--secondary button--small">
+                                    {{ include('partials/icon.twig', {icon: 'envelope', class: 'button__icon'}, with_context = false) }}
+                                    <span class="button__text">{{ lang.postbit_button_pm }}</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert--no-results">{{ lang.no_users }}</div>
+                {% endfor %}
+            </div>
+            {% if groupleader.canmanagemembers %}
+                <div class="sort-results">
+                    <button type="submit" class="button">
+                        {{ include('partials/icon.twig', {icon: 'user-minus', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.remove_selected }}</span>
+                    </button>
+                </div>
+            {% endif %}
+        </form>
+    </section>
+    {% if groupleader.canmanagemembers %}
+        <form method="post" action="managegroup.php">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        <input type="hidden" name="action" value="do_add" />
+        <input type="hidden" name="gid" value="{{ usergroup.gid }}" />
+        <section class="block block--form form">
+            <div class="section section--form">
+                <h2 class="title title--section">{{ trans('add_member', usergroup.title) }}</h2>
+                <div class="section__container">
+                    <div class="row row--form field">
+                        <h3 class="field__name"><label for="username">{{ lang.username }}</label></h3>
+                        <input type="text" id="username" class="user-select-field" name="username" size="40" maxlength="{{ mybb.settings.maxnamelength }}" />
+                    </div>
+                </div>
+            </div>
+            <div class="form__submit">
+                <button type="submit" class="button button--medium">
+                    {{ include('partials/icon.twig', {icon: 'user-plus', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.add_member_submit }}</span>
+                </button>
+            </div>
+        </section>
+        {{ asset('jscripts/select2/select2.css', static=true) }}
+        {{ asset('jscripts/select2/select2.min.js', static=true) }}
+        <script type="text/javascript">
+        <!--
+        if({{ mybb.settings.use_xmlhttprequest }})
+        {
+            MyBB.select2();
+            $("#username").select2({
+                placeholder: "{{ lang.search_user }}",
+                minimumInputLength: 2,
+                multiple: false,
+                allowClear: true,
+                ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                    url: "xmlhttp.php?action=get_users",
+                    dataType: 'json',
+                    data: function (term, page) {
+                        return {
+                            query: term, // search term
+                        };
+                    },
+                    results: function (data, page) { // parse the results into the format expected by Select2.
+                        // since we are using custom formatting functions we do not need to alter remote JSON data
+                        return {results: data};
+                    }
+                },
+                initSelection: function(element, callback) {
+                    var value = $(element).val();
+                    if (value !== "") {
+                        callback({
+                            id: value,
+                            text: value
+                        });
+                    }
+                },
+            });
+        }
+        // -->
+        </script>
+        </form>
+    {% endif %}
+    {% if usergroup.type == 5 and groupleader.caninvitemembers %}
+        <form method="post" action="managegroup.php">
+            <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+            <input type="hidden" name="action" value="do_invite" />
+            <input type="hidden" name="gid" value="{{ usergroup.gid }}" />
+            <section class="block block--form form">
+                <div class="section section--form">
+                    <h2 class="title title--section">{{ trans('invite_member', usergroup.title) }}</h2>
+                    <div class="section__container">
+                        <div class="row row--form field">
+                            <h3 class="field__name"><label for="inviteusername">{{ lang.username }}</label></h3>
+                            <input type="text" id="inviteusername" class="user-select-field" name="inviteusername" size="40" maxlength="{{ mybb.settings.maxnamelength }}" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form__submit">
+                    <button type="submit" class="button button--medium">
+                        {{ include('partials/icon.twig', {icon: 'user-plus', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.invite_member_submit }}</span>
+                    </button>
+                </div>
+            </section>
+            {{ asset('jscripts/select2/select2.css', static=true) }}
+            {{ asset('jscripts/select2/select2.min.js', static=true) }}
+            <script type="text/javascript">
+            <!--
+            if({{ mybb.settings.use_xmlhttprequest }})
+            {
+                MyBB.select2();
+                $("#inviteusername").select2({
+                    placeholder: "{{ lang.search_user }}",
+                    minimumInputLength: 2,
+                    multiple: false,
+                    allowClear: true,
+                    ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                        url: "xmlhttp.php?action=get_users",
+                        dataType: 'json',
+                        data: function (term, page) {
+                            return {
+                                query: term, // search term
+                            };
+                        },
+                        results: function (data, page) { // parse the results into the format expected by Select2.
+                            // since we are using custom formatting functions we do not need to alter remote JSON data
+                            return {results: data};
+                        }
+                    },
+                    initSelection: function(element, callback) {
+                        var value = $(element).val();
+                        if (value !== "") {
+                            callback({
+                                id: value,
+                                text: value
+                            });
+                        }
+                    },
+                });
+            }
+            // -->
+            </script>
+        </form>
+    {% endif %}
+    </div>
+{% endblock body %}

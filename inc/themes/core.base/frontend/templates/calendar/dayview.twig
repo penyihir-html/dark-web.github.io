@@ -1,0 +1,48 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.calendar }} - {{ calendar.day }} {{ calendar.currentmonth }} {{ calendar.year }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ calendar.day }} {{ calendar.currentmonth }} {{ calendar.year }}</h1>
+        </header>
+        <div class="page-controls page-controls--top">
+            <div class="page-buttons">
+                {% if calendar_permissions.canaddevents %}
+                    <a href="calendar.php?action=addevent&amp;calendar={{ calendar.cid }}&amp;day={{ calendar.day }}&amp;month={{ calendar.month }}&amp;year={{ calendar.year }}" class="button button--half-width">
+                        {{ include('partials/icon.twig', {icon: 'calendar-plus', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.add_public_event }}</span>
+                    </a>
+                    <a href="calendar.php?action=addevent&amp;calendar={{ calendar.cid }}&amp;day={{ calendar.day }}&amp;month={{ calendar.month }}&amp;year={{ calendar.year }}&amp;private=1" class="button button--half-width">
+                        {{ include('partials/icon.twig', {icon: 'calendar-plus', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.add_private_event }}</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% if calendar.birthdaycount > 0 %}
+            <section class="container">
+                <h1 class="title title--container">{{ trans('birthdays_on_day', calendar.bdaydate) }}</h1>
+                {% for birthday in birthdays %}
+                    {{ birthday.profilelink|raw }}{{ birthday.age }}{% if not loop.last %}{{ lang.comma }}{% endif %}
+                {% endfor %}
+                {% if calendar.bdayhidden > 0 %}
+                    {{ calendar.hiddendash }}{{ calendar.bdayhidden }} {{ lang.birthdayhidden }}
+                {% endif %}
+            </section>
+        {% endif %}
+        {% for event in events %}
+            {% include 'calendar/event_row.twig' %}
+        {% else %}
+            <section class="block">
+                <div class="alert alert--no-results alert--no-results-container">{{ lang.no_events }}</div>
+            </section>
+        {% endfor %}
+        <footer class="page-footer">
+            {% include 'calendar/calendar_select.twig' %}
+        </footer>
+    </div>
+{% endblock body %}

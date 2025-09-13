@@ -1,0 +1,8 @@
+{% if mybb.user.uid > 0 %}
+    <div class="alert">
+        {{ include('partials/icon.twig', {icon: 'user', class: 'alert__icon'}, with_context = false) }}
+        <p class="alert__message">{{ trans('error_nopermission_user_username', mybb.user.username) }}</p>
+    </div>
+{% else %}
+    {{ lang.error_nopermission_guest_2 }} <a href="member.php?action=login">{{ lang.login }}</a> | <a href="member.php?action=register">{{ lang.need_reg }}</a>
+{% endif %}

@@ -1,0 +1,92 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    {{ forums|raw }}
+
+    {% if (mybb.settings.showwol and mybb.usergroup.canviewonline) or mybb.settings.showindexstats or (mybb.settings.showbirthdays and birthdays|length > 0) %}
+    <section class="board-statistics">
+        {% if (mybb.settings.showwol and mybb.usergroup.canviewonline) %}
+            <div class="board-statistics__section">
+                <h3 class="board-statistics__title">
+                    {{ include('partials/icon.twig', {icon: 'users', class: 'board-statistics__icon fa-fw'}, with_context = false) }}
+                    <a href="online.php">{{ lang.whos_online }}</a>
+                </h3>
+                <p class="board-statistics__body board-statistics__body--active-note">{{ lang.online_note }}</p>
+                <p class="board-statistics__body board-statistics__body--members">
+                    {% set has_bot = false %}
+                    {% for bot in bots %}
+                        {{ bot }}{% if not loop.last %}{{ lang.comma }}{% endif %}
+
+                        {% set has_bot = true %}
+                    {% endfor %}
+                    {% for user in users %}
+                        {% if loop.first and has_bot %}
+                            {{ lang.comma }}
+                        {% endif %}
+
+                        {{ user.profilelink|raw }}{% if loop.last != true %}{{ lang.comma }} {% endif %}
+                        {% if user.invisible == 1 and (mybb.usergroup.canviewwolinvis == 1 or user.uid == mybb.user.uid) %}*{% endif %}
+                    {% endfor %}
+                </p>
+                {% if mybb.settings.showgroupslegend and groups %}
+                <hr>
+                <p class="board-statistics__body board-statistics__body--groups">
+                {% for group in groups %}
+                    {{ group.display|raw }}{% if not loop.last %} &bull; {% endif %}
+                {% endfor %}
+                </p>
+                {% endif %}                
+            </div>
+        {% endif %}
+        {% if birthdays or hiddencount %}
+            <div class="board-statistics__section">
+                <h3 class="board-statistics__title">
+                    {{ include('partials/icon.twig', {icon: 'birthday-cake', class: 'board-statistics__icon fa-fw'}, with_context = false) }}
+                    {{ lang.todays_birthdays }}
+                </h3>
+                <p class="board-statistics__body">
+                    {% apply spaceless %}
+                        {% for user in birthdays %}
+                            {{ user.profilelink|raw }}{% if user.age %} ({{ user.age }}) {% endif %}{% if loop.last != true %}{{ lang.comma }} {% endif %}
+                        {% endfor %}
+                    {% endapply %}{% if hiddencount %} - {{ hiddencount }} {{ lang.birthdayhidden }}{% endif %}
+                </p>
+            </div>
+        {% endif %}
+        {% if mybb.settings.showindexstats %}
+            <div class="board-statistics__section">
+                <h3 class="board-statistics__title">
+                    {{ include('partials/icon.twig', {icon: 'chart-bar', class: 'board-statistics__icon fa-fw'}, with_context = false) }}
+                    <a href="stats.php">{{ lang.boardstats }}</a>
+                </h3>
+                <p class="board-statistics__body">
+                    {{ lang.stats_posts_threads }}<br />
+                    {{ lang.stats_numusers }}<br />
+                    {{ lang.stats_newestuser|raw }}<br />
+                    {{ lang.stats_mostonline|raw }}
+                </p>
+            </div>
+        {% endif %}
+    </section>
+    {% endif %}
+    <div class="page-controls">
+        <div class="page-buttons">
+            {% if mybb.user.uid != 0 %}
+                <a href="member.php?action=logout&amp;logoutkey={{ mybb.user.logoutkey }}" class="button button--basic">
+                    {{ include('partials/icon.twig', {icon: 'sign-out-alt', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.index_logout }}</span>
+                </a>
+            {% endif %}
+            {% if mybb.settings.statsenabled %}
+                <a href="stats.php" class="button button--basic">
+                    {{ include('partials/icon.twig', {icon: 'chart-bar', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.forumstats }}</span>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

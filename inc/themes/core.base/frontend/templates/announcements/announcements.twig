@@ -1,0 +1,18 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.forum_announcement }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ lang.forum_announcement }}</h1>
+        </header>
+        <div id="posts_container">
+            <section class="topic" id="posts">
+                {{ announcement|raw }}
+            </section>
+        </div>
+    </div>
+{% endblock body %}
