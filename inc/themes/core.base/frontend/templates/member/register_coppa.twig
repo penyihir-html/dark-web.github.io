@@ -1,0 +1,62 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.coppa_compliance }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+<div class="page-content page-content--centered">
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.coppa_compliance }}</h1>
+    </header>
+    <form action="member.php" method="post">
+        <div class="block block--form form">
+            <section class="section section--form">
+                <div class="row row--form">
+                    {{ coppa_desc|raw }}
+                </div>
+                <div class="row row--form field">
+                    <h3 class="field__name">{{ lang.date_of_birth }}</h3>
+                    <p class="field__description">{{ lang.hide_dob }}</p>
+                    <div class="date-field">
+                        <div class="date-field__item">
+                            <h4 class="date-field__name"><label for="day">{{ lang.day }}</label></h4>
+                            <div class="select-field">
+                                {{ include('partials/icon.twig', {icon: 'sort', class: 'select-field__icon'}, with_context = false) }}
+                                <select name="bday1" id="day">
+                                    <option value="">&nbsp;</option>
+                                    {% for day in days %}
+                                        <option value="{{ day.day }}"{% if day.selected %} selected="selected"{% endif %}>{{ day.day }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="date-field__item">
+                            <h4 class="date-field__name"><label for="month">{{ lang.month }}</label></h4>
+                            <div class="select-field">
+                                {{ include('partials/icon.twig', {icon: 'sort', class: 'select-field__icon'}, with_context = false) }}
+                                <select name="bday2" id="month">
+                                    <option value="">&nbsp;</option>
+                                    {% for month in months %}
+                                        <option value="{{ month.month }}"{% if month.selected %} selected="selected"{% endif %}>{{ month.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="date-field__item">
+                            <h4 class="date-field__name"><label for="year">{{ lang.year }}</label></h4>
+                            <input type="text" class="textbox textbox--small" size="4" maxlength="4" name="bday3" id="year" value="{{ year }}" />
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="form__submit">
+                <button type="submit" class="button button--medium" name="agree">
+                    <span class="button__text">{{ lang.continue_registration }}</span>
+                    {{ include('partials/icon.twig', {icon: 'arrow-right', class: 'button__icon button__icon--after'}, with_context = false) }}
+                </button>
+            </div>
+        </div>
+        <input type="hidden" name="action" value="register" />
+    </form>
+{% endblock body %}

@@ -1,0 +1,14 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.help_docs }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ helpdoc.name }}</h1>
+        </header>
+        <div class="scaleimages">{{ helpdoc.document|raw }}</div>
+    </div>
+{% endblock body %}

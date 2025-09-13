@@ -1,0 +1,29 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.smilies_listing }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content page-content--centered">
+        <header class="page-header">
+            <h1 class="title title--page">{{ lang.smilies_listing }}</h1>
+        </header>
+
+        <section class="block smilie-list">
+            <div class="container container--adjacent container--simple-columns smilie-list__legend">
+                <div class="container__primary smilie-list__name">{{ lang.name }}</div>
+                <div class="container__secondary smilie-list__replace">{{ lang.abbreviation }}</div>
+            </div>
+            {% for smilie in smilies %}
+                <div class="row row--simple-columns smilie-list__item">
+                    <div class="smilie-list__smilie"><img src="{{ smilie.image }}" alt="{{ smilie.name }}" title="{{ smilie.name }}" class="smilie smilie_{{ smilie.sid }}" /></div>
+                    <div class="row__primary smilie-list__name">{{ smilie.name }}</div>
+                    <div class="row__secondary smilie-list__replace">{{ smilie.find|nl2br }}</div>
+                </div>
+            {% else %}
+                <div class="alert alert--no-results">{{ lang.no_smilies }}</div>
+            {% endfor %}
+        </section>
+    </div>
+{% endblock body %}

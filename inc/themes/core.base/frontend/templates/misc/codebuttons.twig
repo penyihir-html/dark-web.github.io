@@ -1,0 +1,42 @@
+{{ asset('jscripts/sceditor/themes/' ~ theme.editortheme, static=true) }}
+{{ asset('jscripts/sceditor/jquery.sceditor.bbcode.min.js', static=true) }}
+{{ asset('jscripts/bbcodes_sceditor.js', static=true) }}
+{{ asset('jscripts/sceditor/plugins/undo.js', static=true) }}
+<script type="text/javascript">
+    var partialmode = {{ mybb.settings.partialmode }},
+    opt_editor = {
+        plugins: "undo",
+        format: "bbcode",
+        bbcodeTrim: false,
+        style: "{{ mybb.asset_url }}/jscripts/sceditor/styles/jquery.sceditor.{{ theme.editortheme }}?ver=1832",
+        rtl: {{ lang.settings.rtl }},
+        locale: "mybblang",
+        width: "100%",
+        enablePasteFiltering: true,
+        autoUpdate: true,
+        emoticonsEnabled: {% if emoticons.dropdown %}true{% else %}false{% endif %},
+        emoticons: {
+            // Emoticons to be included in the dropdown
+            dropdown: {
+                {{ emoticons.dropdown|raw }}
+            },
+            // Emoticons to be included in the more section
+            more: {
+                {{ emoticons.more|raw }}
+            },
+            // Emoticons that are not shown in the dropdown but will still be converted. Can be used for things like aliases
+            hidden: {
+                {{ emoticons.hidden|raw }}
+            }
+        },
+        emoticonsCompat: true,
+        toolbar: "{{ toolbar.basic1 }}{{ toolbar.align }}{{ toolbar.font }}{{ toolbar.size }}{{ toolbar.color }}{{ toolbar.removeformat }}{{ toolbar.basic2 }}image,{{ toolbar.email }}{{ toolbar.link }}|video{{ toolbar.emoticon }}|{{ toolbar.list }}{{ toolbar.code }}quote|maximize,source",
+    };
+    {{ editor_language|raw }}
+    $(function() {
+        $("#{{ bind }}").sceditor(opt_editor);
+
+        MyBBEditor = $("#{{ bind }}").sceditor("instance");
+        {% if mybb.user.sourceeditor %}MyBBEditor.sourceMode(true);{% endif %}
+    });
+</script>

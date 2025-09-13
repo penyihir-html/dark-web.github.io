@@ -1,0 +1,30 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.resend_activation }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content page-content--centered">
+        <header class="page-header">
+            <h1 class="title title--page">{{ lang.resend_activation }}</h1>
+        </header>
+        <form action="member.php" method="post">
+            <div class="block block--form form">
+                <section class="section section--form">
+                    <div class="row row--form field">
+                        <h3 class="field__name"><label for="email">{{ lang.email_address }}</label></h3>
+                        <input type="text" class="textbox" name="email" id="email" value="{{ email }}" />
+                    </div>
+                </section>
+                <div class="form__submit">
+                    <button type="submit" class="button button--medium" name="submit" tabindex="3">
+                        {{ include('partials/icon.twig', {icon: 'sync-alt', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.request_activation }}</span>
+                    </button>
+                </div>
+            </div>
+            <input type="hidden" name="action" value="do_resendactivation" />
+        </form>
+    </div>
+{% endblock body %}

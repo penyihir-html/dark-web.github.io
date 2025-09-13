@@ -1,0 +1,111 @@
+{# NoCAPTCHA #}
+{% if type == 4 %}
+<section class="section section--form">
+    <h2 class="title title--section">{{ lang.human_verification }}</h2>
+    <div class="section__container">
+        <div class="row row--form field">
+            <p class="field__description">{{ lang.verification_note_nocaptcha }}</p>
+            <script type="text/javascript" src="{{ server }}"></script><div class="g-recaptcha" data-sitekey="{{ mybb.settings.captchapublickey }}"></div>
+        </div>
+    </div>
+</section>
+{# ReCAPTCHA v2 #}
+{% elseif type == 5 %}
+    <script src="{{ server }}?onload=captchaOnloadCallback&render=explicit" async defer></script>
+    <script type="text/javascript">
+
+        var captchaOnSubmit = function(token) {
+            $("#registration_form").trigger('submit');
+        };
+
+        var captchaOnloadCallback = function() {
+
+            var target = $('button[name="regsubmit"]');
+            target.attr('data-size', 'invisible');
+
+            grecaptcha.render(target.get(0), {
+                'sitekey': '{{ mybb.settings.captchapublickey }}',
+                'callback': captchaOnSubmit
+            }, true);
+
+        }
+
+    </script>
+{# hCaptcha #}
+{% elseif type == 6 %}
+<section class="section section--form" id="captcha_trow">
+    <h2 class="title title--section">{{ lang.human_verification }}</h2>
+    <div class="section__container">
+        <div class="row row--form field">
+            <p class="field__description">{{ lang.verification_note_hcaptcha }}</p>
+            <script type="text/javascript" src="{{ server }}"></script><div class="h-captcha" data-sitekey="{{ mybb.settings.hcaptchapublickey }}" data-theme="{{ mybb.settings.captcha_theme }}" data-size="{{ mybb.settings.captcha_size }}"></div>
+        </div>
+    </div>
+</section>
+{# hCaptcha invisible #}
+{% elseif type == 7 %}
+     <script src="{{ server }}?onload=captchaOnloadCallback&render=explicit" async defer></script>
+     <script type="text/javascript">
+     var captchaOnSubmit = function(token) {
+          $("#registration_form").trigger('submit');
+     };
+
+     var captchaOnloadCallback = function() {
+
+          var target = $('button[name="regsubmit"]');
+          target.attr('data-size', 'invisible');
+
+          hcaptcha.render(target.get(0), {
+               'sitekey': '{{ mybb.settings.hcaptchapublickey }}',
+               'callback': captchaOnSubmit
+          }, true);
+
+     }
+     </script>
+{# CFTurnstile #}
+{% elseif type == 9 %}
+    <section class="section section--form" id="captcha_trow">
+        <h2 class="title title--section">{{ lang.human_verification }}</h2>
+        <div class="section__container">
+            <div class="row row--form field">
+                <p class="field__description">{{ lang.verification_note_cfturnstile }}</p>
+                <script type="text/javascript" src="{{ server }}"></script><div class="h-captcha" data-sitekey="{{ mybb.settings.cfturnstilepublickey }}" data-theme="{{ mybb.settings.cfturnstiletheme }}" data-size="{{ mybb.settings.cfturnstilesize }}"></div>
+            </div>
+        </div>
+    </section>
+{# MyBB Captcha #}
+{% else %}
+    <section class="section section--form">
+        <h2 class="title title--section">{{ lang.image_verification }}</h2>
+        <div class="section__container">
+            <div class="row row--form field">
+                <script type="text/javascript">
+                <!--
+                    lang.captcha_fetch_failure = "{{ lang.captcha_fetch_failure }}";
+                // -->
+                </script>
+                <script type="text/javascript" src="{{ mybb.asset_url }}/jscripts/captcha.js?ver=1808"></script>
+                <p class="field__description">{{ lang.verification_note }}</p>
+                <div class="field__block">
+                    <img src="captcha.php?action=regimage&amp;imagehash={{ imagehash }}" alt="{{ lang.image_verification }}" title="{{ lang.image_verification }}" id="captcha_img" />
+                </div>
+                <div class="field__block">
+                    <p class="field__description">{{ lang.verification_subnote }}</p>
+                </div>
+                <div class="field__block">
+                    <input type="text" class="textbox textbox--large" name="imagestring" value="" id="imagestring" />
+                    <script type="text/javascript">
+                    <!--
+                        if(use_xmlhttprequest == "1")
+                        {
+                            document.write('<button class="button button--inline" tabindex="10000" name="refresh" onclick="return captcha.refresh();">{% apply spaceless %}{{ include('partials/icon.twig', {icon: 'sync-alt', class: 'button__icon'}, with_context = false) }}{% endapply %}<span class="button__text">{{ lang.refresh }}</span></button>');
+                        }
+                    // -->
+                    </script>
+                    <input type="hidden" name="imagehash" value="{{ imagehash }}" id="imagehash" />
+                    <div id="imagestring_status"  style="display: none;" colspan="2">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}

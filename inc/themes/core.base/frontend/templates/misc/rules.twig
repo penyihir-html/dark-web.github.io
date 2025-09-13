@@ -1,0 +1,14 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ forum.rulestitle }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ forum.rulestitle }}</h1>
+        </header>
+        <div class="scaleimages">{{ forum.rules }}</div>
+    </div>
+{% endblock body %}

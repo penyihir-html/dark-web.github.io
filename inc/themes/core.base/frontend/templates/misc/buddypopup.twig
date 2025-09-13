@@ -1,0 +1,29 @@
+<div class="modal">
+    <section class="block block--modal">
+        <h2 class="title title--modal">{{ lang.buddy_list }}</h2>
+        <div class="modal__content">
+            {% if buddies.showlist %}
+                <div class="block__content">
+                    <h3 class="title title--minor">{{ lang.online }}</h3>
+                    <div class="user-list user-list--has-title user-list--single-column user-list--compact">
+                        {% for buddy in buddys.online %}
+                            {% include 'misc/buddypopup/user.twig' %}
+                        {% else %}
+                            <div class="alert alert--no-results">{{ lang.online_none }}</div>
+                        {% endfor %}
+                    </div>
+                    <h3 class="title title--minor">{{ lang.offline }}</h3>
+                    <div class="user-list user-list--has-title user-list--single-column user-list--compact">
+                        {% for buddy in buddys.offline %}
+                            {% include 'misc/buddypopup/user.twig' %}
+                        {% else %}
+                            <div class="alert alert--no-results">{{ lang.offline_none }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert--no-results">{{ lang.no_buddies }}</div>
+            {% endif %}
+        </div>
+    </section>
+</div>
