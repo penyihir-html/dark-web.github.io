@@ -1,0 +1,89 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.ipsearch }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.ipsearch }}</h1>
+    </header>
+{% endblock %}
+
+{% block moderationBody %}
+    {% if ipsearch.results %}
+        {% if ipsearch.info_link %}
+            <div class="page-controls">
+                <div class="page-buttons">
+                    <a href="modcp.php?action=iplookup&amp;ipaddress={{ ipsearch.ipaddress }}" onclick="MyBB.popupWindow('/modcp.php?action=iplookup&ipaddress={{ ipaddress_url }}&modal=1'); return false;" class="button button--basic">
+                        {{ include('partials/icon.twig', {icon: 'info-circle', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.info_on_ip }}</span>
+                    </a>
+                    <a href="http://www.stopforumspam.com/ipcheck/{{ ipsearch.ipaddress }}" target="_blank" rel="noopener" class="button button--basic">
+                        {{ include('partials/icon.twig', {icon: 'hand-paper', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.search_ip_sfs }}</span>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        <section class="block">
+           <h1 class="title title--major">
+               {% if ipsearch.ipaddress %}
+                    {{ trans('ipsearch_results', ipsearch.ipaddress) }}
+                {% else %}
+                    {{ lang.ipsearch }}
+                {% endif %}
+            </h1>
+            {% for ipaddress in ipresults %}
+                <div class="row row--simple-columns">
+                	<div class="row__primary">
+                        {% if ipaddress.type == 'regip' %}
+                            <strong>{{ lang.ipresult_regip }}</strong> {{ ipaddress.profile_link|raw }}
+                        {% elseif ipaddress.type == 'lastip' %}
+                            <strong>{{ lang.ipresult_lastip }}</strong> {{ ipaddress.profile_link|raw }}
+                        {% else %}
+                            <strong>{{ lang.ipresult_post }}</strong> <a href="{{ ipaddress.postlink|raw }}">{{ ipaddress.subject }}</a> {{ lang.by }} {{ ipaddress.profilelink|raw }}
+                        {% endif %}
+                    </div>
+                    <div class="row__secondary">{{ ipaddress.ip }}</div>
+                </div>
+            {% else %}
+                <div class="alert alert--no-results">{{ lang.error_no_results }}</div>
+            {% endfor %}
+        </section>
+        {{ multipage|raw }}
+    {% endif %}
+
+    <form action="modcp.php?action=ipsearch" method="post">
+        <section class="block block--form form">
+            <div class="section section--form">
+                <h2 class="title title--section">{{ lang.ipaddress_search }}</h2>
+                <div class="section__container">
+                    <div class="row row--form field">
+                        <h3 class="field__name"><label for="ipaddress">{{ lang.ip_address }}</label></h3>
+                        <input type="text" class="textbox" name="ipaddress" id="ipaddress" value="{{ ipsearch.ipaddress }}" size="30" />
+                    </div>
+                </div>
+            </div>
+            <div class="section section--form">
+                <h2 class="title title--section">{{ lang.options }}</h2>
+                <div class="section__container">
+                    <div class="row row--form field">
+                        <p class="option-field option-field--compact">
+                            <label><input type="checkbox" class="checkbox" name="search_users" value="1"{% if ipsearch.usersearch %} checked{% endif %} />{{ lang.search_users }}</label>
+                        </p>
+                        <p class="option-field option-field--compact">
+                            <label><input type="checkbox" class="checkbox" name="search_posts" value="1"{% if ipsearch.postsearch %} checked{% endif %} />{{ lang.search_posts }}</label>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="form__submit">
+                <button type="submit" class="button button--medium">
+                {{ include('partials/icon.twig', {icon: 'search', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.find }}</span>
+                </button>
+            </div>
+        </section>
+    </form>
+{% endblock moderationBody %}

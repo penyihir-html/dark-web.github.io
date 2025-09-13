@@ -1,0 +1,22 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.all_reports }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.all_reports }}</h1>
+    </header>
+{% endblock moderationHeader %}
+
+{% block moderationBody %}
+    <section class="block">
+        {% for report in allreports %}
+            {% include 'modcp/allreports/item.twig' %}
+        {% else %}
+            <div class="alert alert--no-results alert--no-results-container">{{ lang.no_reports }}</div>
+        {% endfor %}
+    </section>
+    {{ multipage|raw }}
+{% endblock moderationBody %}

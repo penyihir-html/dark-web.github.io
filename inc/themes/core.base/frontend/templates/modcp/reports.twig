@@ -1,0 +1,58 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.report_center }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.report_center }}</h1>
+    </header>
+{% endblock %}
+
+{% block moderationBody %}
+    <form action="modcp.php" method="post">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        <input type="hidden" name="page" value="{{ report.page }}" />
+        <input type="hidden" name="action" value="do_reports" />
+        <section class="block">
+            <div class="container container--small container--adjacent">
+                <div class="select-all">
+                    <input type="checkbox" name="allbox" onclick="inlineReports.checkAll(this);" />
+                </div>
+            </div>
+            {% if report.selectall %}
+                <div class="thread-list__select-all" id="selectAllrow">
+                    {{ trans('page_selected', report.reportcache) }} <a href="javascript:void(0)" onclick='inlineReports.selectAll(); return false;'>{{ trans('select_all', report.report_count) }}</a>
+                </div>
+                <div class="thread-list__select-all" id="allSelectedrow">
+                    {{ trans('all_selected', report.report_count) }} <a href="javascript:void(0)" onclick='inlineReports.clearChecked(); return false;'>{{ lang.clear_selection }}</a>
+                </div>
+            {% endif %}
+            <div class="results">
+                {% for report in reports %}
+                    {% include 'modcp/reports/item.twig' %}
+                {% else %}
+                    <div class="alert alert--no-results">{{ lang.no_reports }}</div>
+                {% endfor %}
+            </div>
+            <div class="sort-results">
+                <button type="submit" class="button" name="reportsubmit">
+                    {{ include('partials/icon.twig', {icon: 'check', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text" id="inline_read">{{ lang.mark_read }} ({{ report.inlinecount }})</span>
+                </button>
+                <a href="modcp.php?action=allreports" class="button button--secondary">
+                    {{ include('partials/icon.twig', {icon: 'flag', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.view_all_reports }}</span>
+                </a>
+            </div>
+        </section>
+        {{ multipage|raw }}
+    </form>
+    <script type="text/javascript">
+    <!--
+        var mark_read_text = "{{ lang.mark_read }}";
+        var all_text = "{{ report.report_count }}";
+    // -->
+    </script>
+{% endblock moderationBody %}

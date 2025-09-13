@@ -1,0 +1,46 @@
+{% extends 'layouts/messenger.twig' %}
+
+{% block head %}
+    <title>{{ lang.empty_folders }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block messengerHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.empty_folders }}</h1>
+    </header>
+{% endblock messengerHeader %}
+
+{% block messengerBody %}
+    <form action="private.php" method="post">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        <div class="block block--form form">
+            <section class="section section--form">
+                <div class="row row--form field">{{ lang.empty_note|raw }}</div>
+                <div class="row row--form field">
+                    <h3 class="field__name">{{ lang.empty_these_folders }}</h3>
+                    {% for folder in folders %}
+                        <div class="option-field option-field--compact">
+                            <label>
+                                <input type="checkbox" class="option-field__input checkbox" name="empty[{{ folder.id }}]" value="1" />
+                                <span class="option-field__name option-field__name--inline">{{ folder.foldername }}</span>
+                                <span class="option-field__description option-field__description--inline">({{ folder.foldercount }} {% if folder.foldercount == 1 %}{{ lang.empty_message }}{% else %}{{ lang.empty_messages }}{% endif %})</span>
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="row row--form field">
+                    <p class="option-field option-field--compact">
+                        <label><input type="checkbox" class="checkbox" name="keepunread" value="1" checked="checked" /> {{ lang.keep_unread }}</label>
+                    </p>
+                </div>
+            </section>
+            <div class="form__submit">
+                <button type="submit" class="button button--medium" name="submit">
+                    {{ include('partials/icon.twig', {icon: 'trash', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.delete }}</span>
+                </button>
+            </div>
+        </div>
+        <input type="hidden" name="action" value="do_empty" />
+    </form>
+{% endblock messengerBody %}

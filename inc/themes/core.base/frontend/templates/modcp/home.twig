@@ -1,0 +1,116 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.modcp }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.modcp }}</h1>
+    </header>
+{% endblock %}
+
+{% block moderationBody %}
+    {# Latest resources in mod queue #}
+    {% if mybb.usergroup.canmanagemodqueue and (attachment or post or thread) %}
+        <section class="block">
+            <h1 class="title title--major">{{ lang.awaiting_moderation }}</h1>
+            {# Thread #}
+            {% if counters.modqueue.threads > 0 or mybb.usergroup.issupermod %}
+                <div class="row row--simple-columns awaiting-moderation">
+                    <div class="row__primary awaiting-moderation__type">
+                        <h3 class="awaiting-moderation__title"><a href="modcp.php?action=modqueue&amp;type=threads">{{ lang.threads }}</a></h3>
+                        <p class="awaiting-moderation__count">{{ unapproved_threads }} {{ lang.number_awaiting }}</p>
+                    </div>
+                    <div class="row__secondary awaiting-moderation__latest">
+                        <span class="awaiting-moderation__latest-title">{{ lang.latest }}</span>
+                        {% if thread.link %}
+                            <a href="{{ thread.link }}" title="{{ thread.fullsubject }}"><strong>{{ thread.subject }}</strong></a><br />
+                            {{ thread.date }} {{ lang.by }} {{ thread.profilelink|raw }}
+                        {% else %}
+                            {{ lang.none }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            {# Post #}
+            {% if counters.modqueue.posts > 0 or mybb.usergroup.issupermod %}
+                <div class="row row--simple-columns awaiting-moderation">
+                    <div class="row__primary awaiting-moderation__type">
+                        <h3 class="awaiting-moderation__title"><a href="modcp.php?action=modqueue&amp;type=posts">{{ lang.posts }}</a></h3>
+                        <p class="awaiting-moderation__count">{{ unapproved_posts }} {{ lang.number_awaiting }}</p>
+                    </div>
+                    <div class="row__secondary awaiting-moderation__latest">
+                        <span class="awaiting-moderation__latest-title">{{ lang.latest }}</span>
+                        {% if post.link %}
+                            <a href="{{ post.link }}#pid{{ post.pid }}" title="{{ post.fullsubject }}"><strong>{{ post.subject }}</strong></a><br />
+                            {{ post.date }} {{ lang.by }} {{ post.profilelink|raw }}
+                        {% else %}
+                            {{ lang.none }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            {# Attachment #}
+            {% if mybb.settings.enableattachments and (counters.modqueue.attachments > 0 or mybb.usergroup.issupermod) %}
+                <div class="row row--simple-columns awaiting-moderation">
+                    <div class="row__primary awaiting-moderation__type">
+                        <h3 class="awaiting-moderation__title"><a href="modcp.php?action=modqueue&amp;type=attachments">{{ lang.attachments }}</a></h3>
+                        <p class="awaiting-moderation__count">{{ unapproved_attachments }} {{ lang.number_awaiting }}</p>
+                    </div>
+                    <div class="row__secondary awaiting-moderation__latest">
+                        <span class="awaiting-moderation__latest-title">{{ lang.latest }}</span>
+                        {% if attachment.link %}
+                            <a href="{{ attachment.link }}#pid{{ attachment.pid }}"><strong>{{ attachment.filename }}</strong></a><br />
+                            {{ attachment.date }} {{ lang.by }} {{ attachment.profilelink|raw }}
+                        {% else %}
+                            {{ lang.none }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {# Latest 5 mod actions #}
+    {% if (counters.modlogs > 0 or mybb.usergroup.issupermod) and mybb.usergroup.canviewmodlogs %}
+        <section class="block">
+            <h1 class="title title--major">{{ lang.modlogs }}</h1>
+            {% for logitem in modlogs %}
+                {% include 'modcp/modlogs/item.twig' %}
+            {% else %}
+                <div class="alert alert--no-results">{{ lang.error_no_results }}</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <section class="block">
+        <h1 class="title title--major">{{ lang.bans_ending_soon }}</h1>
+        {% for banned in bannedusers %}
+            {% include 'modcp/banning/item.twig' %}
+        {% else %}
+            <div class="alert alert--no-results">{{ lang.no_banned_soon }}</div>
+        {% endfor %}
+    </section>
+
+    <form action="modcp.php" method="post">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        <input type="hidden" name="action" value="do_modnotes" />
+        <section class="block block--form form">
+            <div class="section section--form">
+                <div class="row row--form field">
+                    <h3 class="field__name"><label for="notepad">{{ lang.moderator_notes }}</label></h3>
+                    <p class="field__description">{{ lang.notes_public_all }}</p>
+                    <textarea name="modnotes" id="notepad" rows="10">{{ modnotes }}</textarea>
+                </div>
+            </div>
+            <div class="form__submit">
+                <input type="hidden" name="action" value="do_notepad" />
+                <button type="submit" class="button" name="submit">
+                    {{ include('partials/icon.twig', {icon: 'sticky-note', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.save_notes }}</span>
+                </button>
+            </div>
+        </section>
+    </form>
+{% endblock moderationBody %}

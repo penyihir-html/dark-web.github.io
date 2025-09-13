@@ -1,0 +1,30 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.ban_banned }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.ban_banned }}</h1>
+    </header>
+{% endblock %}
+
+{% block moderationBody %}
+    <div class="page-controls">
+        <div class="page-buttons">
+            <a href="modcp.php?action=banuser" class="button button--full-width button--medium">
+                {{ include('partials/icon.twig', {icon: 'ban', class: 'button__icon'}, with_context = false) }}
+                <span class="button__text">{{ lang.ban_user }}</span>
+            </a>
+        </div>
+    </div>
+    <div class="user-list">
+        {% for banned in bannedusers %}
+            {% include 'modcp/banning/item.twig' %}
+        {% else %}
+            <div class="alert alert--no-results alert--no-results-container">{{ lang.no_banned }}</div>
+        {% endfor %}
+    </div>
+    {{ multipage|raw }}
+{% endblock moderationBody %}

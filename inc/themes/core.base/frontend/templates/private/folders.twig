@@ -1,0 +1,51 @@
+{% extends 'layouts/messenger.twig' %}
+
+{% block head %}
+    <title>{{ lang.pm_folders }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block messengerHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.pm_folders }}</h1>
+    </header>
+{% endblock messengerHeader %}
+
+{% block messengerBody %}
+    <form action="private.php" method="post">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        <div class="block block--form form">
+            <section class="section section--form">
+                <h2 class="title title--section">{{ lang.existing_folders }}</h2>
+                <div class="section__container">
+                    <div class="row row--form field">{{ lang.edit_folder_note|raw }}</div>
+                    {% for folder in folders %}
+                        <div class="row row--form field">
+                            <input type="text" class="textbox" name="folder[{{ folder.id }}]" value="{{ folder.foldername }}" maxlength="30" />
+                            {% if folder.default %}
+                                <p class="field__description field__description--below">({{ folder.defaultname }} - {{ lang.cannot_be_removed }})</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            <section class="section section--form">
+                <h2 class="title title--section">{{ lang.new_folders }}</h2>
+                <div class="section__container">
+                    <div class="row row--form field">{{ lang.add_folders_note }}</div>
+                    {% for fid in 1..5 %}
+                        <div class="row row--form field">
+                            <input type="text" class="textbox" name="folder[new{{ fid }}]" value="" maxlength="30" />
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            <div class="form__submit">
+                <button type="submit" class="button button--medium" name="submit" tabindex="4" accesskey="s">
+                    {{ include('partials/icon.twig', {icon: 'folder-open', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.update_folders }}</span>
+                </button>
+            </div>
+        </div>
+        <input type="hidden" name="action" value="do_folders" />
+    </form>
+{% endblock messengerBody %}

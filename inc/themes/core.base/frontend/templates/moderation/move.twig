@@ -1,0 +1,48 @@
+{% extends 'layouts/master.twig' %}
+
+{% block head %}
+    <title>{{ lang.move_copy_thread }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block body %}
+    <div class="page-content">
+        <header class="page-header">
+            <h1 class="title title--page">{{ lang.move_copy_thread }}</h1>
+        </header>
+        <form action="moderation.php" method="post">
+            <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+            <section class="block block--form form">
+                <div class="section section--form">
+                    <div class="row row--form field">
+                        <h3 class="field__name">{{ lang.new_forum }}</h3>
+                        {{ forumselect|raw }}
+                    </div>
+                    <div class="row row--form field">
+                        <h3 class="field__name">{{ lang.method }}</h3>
+                        <div class="option-field">
+                            <input type="radio" class="radio" name="method" value="move" id="method_move" />
+                            <h4 class="option-field__name option-field__name--light"><label for="method_move">{{ lang.method_move }}</label></h4>
+                        </div>
+                        <div class="option-field">
+                            <input type="radio" class="radio" name="method" value="redirect" id="method_redirect" checked="checked" />
+                            <h4 class="option-field__name option-field__name--light"><label for="method_redirect">{{ lang.method_move_redirect }}</label> &nbsp;<label><input type="text" class="textbox textbox--small" name="redirect_expire" size="3" /> {{ lang.method_move_redirect_days }}</label></h4>
+                            <p class="option-field__description">{{ lang.redirect_expire_note }}</p>
+                        </div>
+                        <div class="option-field">
+                            <input type="radio" class="radio" name="method" value="copy" id="method_copy" />
+                            <h4 class="option-field__name option-field__name--light"><label for="method_copy">{{ lang.method_copy }}</label></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="form__submit">
+                    <button type="submit" class="button button--medium">
+                        {{ include('partials/icon.twig', {icon: 'arrow-alt-circle-right', class: 'button__icon'}, with_context = false) }}
+                        <span class="button__text">{{ lang.move_copy_thread }}</span>
+                    </button>
+                </div>
+            </section>
+            <input type="hidden" name="action" value="do_move" />
+            <input type="hidden" name="tid" value="{{ thread.tid }}" />
+        </form>
+    </div>
+{% endblock body %}

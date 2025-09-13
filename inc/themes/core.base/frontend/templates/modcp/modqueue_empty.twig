@@ -1,0 +1,15 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.mod_queue }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.mod_queue }}</h1>
+    </header>
+{% endblock moderationHeader %}
+
+{% block moderationBody %}
+    <div class="alert alert--no-results alert--no-results-container">{{ lang.mod_queue_empty }}</div>
+{% endblock moderationBody %}

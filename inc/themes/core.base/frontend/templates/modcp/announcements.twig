@@ -1,0 +1,64 @@
+{% extends 'layouts/moderation.twig' %}
+
+{% block head %}
+    <title>{{ lang.manage_announcement }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block moderationHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.manage_announcement }}</h1>
+    </header>
+{% endblock %}
+
+{% block moderationBody %}
+    {# Global announcements #}
+    {% if mybb.usergroup.issupermod %}
+        <div class="page-controls">
+            <div class="page-buttons">
+                <a href="modcp.php?action=new_announcement&amp;fid=-1" class="button button--medium button--full-width">
+                    {{ include('partials/icon.twig', {icon: 'plus', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.add_global_announcement }}</span>
+                </a>
+            </div>
+        </div>
+        <section class="block">
+            <h1 class="title title--major">{{ lang.global_announcements }}</h1>
+            {% for aid, announcement in globalAnnouncements %}
+                <div class="row row--simple-columns">
+                    <div class="row__primary">
+                        {% if announcement.startdate > 'now'|date('U') or ('now'|date('U') > announcement.enddate and announcement.enddate) %}
+                            {% set title = lang.expired_announcement %}
+                            {% set class = 'subdued' %}
+                        {% else %}
+                            {% set title = lang.active_announcement %}
+                            {% set class = 'primary' %}
+                        {% endif %}
+                        {{ include('partials/icon.twig', {icon: 'circle', class: 'icon icon--announcement icon--' ~ class, title: title}, with_context = false) }}
+                        <a href="announcements.php?aid={{ aid }}">{{ announcement.subject }}</a>
+                    </div>
+                    <div class="row__controls">
+                        <a href="modcp.php?action=edit_announcement&amp;aid={{ aid }}" class="button button--secondary button--small">
+                            {{ include('partials/icon.twig', {icon: 'pencil-alt', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.edit }}</span>
+                        </a>
+                        <a href="modcp.php?action=delete_announcement&amp;aid={{ aid }}" class="button button--secondary button--danger button--small">
+                            {{ include('partials/icon.twig', {icon: 'trash', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.delete }}</span>
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert--no-results">{{ lang.no_global_announcements }}</div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <section class="block">
+        <h1 class="title title--major">{{ lang.forum_announcements }}</h1>
+        {% if forumAnnouncements %}
+            {{ forumAnnouncements|raw }}
+        {% else %}
+            <div class="alert alert--no-results">{{ lang.no_forum_announcements }}</div>
+        {% endif %}
+    </section>
+{% endblock moderationBody %}

@@ -1,0 +1,269 @@
+{% extends 'layouts/messenger.twig' %}
+
+{% block head %}
+    <title>{{ lang.compose_pm }} - {{ mybb.settings.bbname }}</title>
+{% endblock head %}
+
+{% block messengerHeader %}
+    <header class="page-header">
+        <h1 class="title title--page">{{ lang.compose_pm }}</h1>
+    </header>
+{% endblock messengerHeader %}
+
+{% block messengerBody %}
+    <form action="private.php" method="post" name="input">
+        <input type="hidden" name="my_post_key" value="{{ mybb.post_code }}" />
+        {% if sendpm.preview %}
+            <section class="block block--container">
+                <h1 class="title title--major title--separation">{{ lang.post_preview }}</h1>
+                <div id="posts_container">
+                    <div id="posts">
+                        {{ postbit|raw }}
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+        {{ send_errors|raw }}
+        <div class="form form--compose compose">
+            <input type="checkbox" class="compose__checkbox" id="show-post-options">
+            <section class="section section--form compose__recipients">
+                <h2 class="title title--section">
+                    {{ lang.compose_to }}
+                    <script type="text/javascript">
+                    <!--
+                        document.write('(<a href="javascript:void(0)" onclick="showBcc(); return false;" title="{{ lang.compose_bcc_show_title }}">{{ lang.compose_bcc_show }}<\/a>)');
+                    // -->
+                    </script>
+                </h2>
+                <div class="section__container">
+                    <div class="row row--form row--no-border field">
+                        <textarea name="to" id="to" rows="2" cols="38" tabindex="1" style="width: 450px;">{{ sendpm.to }}</textarea>
+                        <p class="field__description field__description--below">
+                            {{ lang.separate_names }}
+                            {% if mybb.user.buddylist and mybb.settings.use_xmlhttprequest %}
+                                <script type="text/javascript"><!--
+                                document.write('<br /><span class="smalltext"><a href="javascript:void(0)" onclick="UserCP.openBuddySelect(\'to\'); return false;">
+                                <img src="{{ theme.imgdir }}/buddies.png" alt="" style="vertical-align: middle;" alt="" title="{{ lang.select_from_buddies }}" /> {{ lang.select_from_buddies }}</a></span>');
+                                // --></script>
+                            {% endif %}
+                            {% if mybb.usergroup.maxpmrecipients %}
+                                {{ trans('max_recipients', mybb.usergroup.maxpmrecipients) }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="row row--form field" id="bcc_area">
+                        <h3 class="field__name">{{ lang.compose_bcc }}</h3>
+                        <textarea name="bcc" id="bcc" rows="2" cols="38" tabindex="1" style="width: 450px;">{{ sendpm.bcc }}</textarea>
+                        <p class="field__description field__description--below">
+                            {% if mybb.user.buddylist and mybb.settings.use_xmlhttprequest %}
+                                <script type="text/javascript"><!--
+                                document.write('<br /><span class="smalltext"><a href="javascript:void(0)" onclick="UserCP.openBuddySelect(\'bcc\'); return false;">
+                                <img src="{{ theme.imgdir }}/buddies.png" alt="" style="vertical-align: middle;" alt="" title="{{ lang.select_from_buddies }}" /> {{ lang.select_from_buddies }}</a></span>');
+                                // --></script>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </section>
+            <section class="section section--form compose__primary-section">
+                <div class="row row--form field">
+                    <input type="text" class="textbox textbox--subject" name="subject" size="40" maxlength="85" value="{{ sendpm.subject }}" placeholder="{{ lang.compose_subject }}" tabindex="1" />
+                </div>
+                {% if sendpm.showposticons %}
+                    {% set emptyiconcheck = sendpm.emptyiconcheck %}
+                    {% include 'misc/posticons.twig' %}
+                {% endif %}
+                <div class="row row--form field">
+                    <div class="compose__container">
+                        <div class="compose__message">
+                            <textarea name="message" id="message" rows="20" cols="70" tabindex="4">{{ sendpm.message }}</textarea>
+                            {{ codebuttons|raw }}
+                        </div>
+                        {{ smilieinserter|raw }}
+                    </div>
+                    <div class="compose__option-buttons">
+                        <label for="show-post-options" class="button button--basic compose__option-button--options">
+                            {{ include('partials/icon.twig', {icon: 'cog', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.options }}</span>
+                        </label>
+                        <button type="submit" name="saveasdraft" value="draft" class="button button--basic">
+                            {{ include('partials/icon.twig', {icon: 'file', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.save_draft }}</span>
+                        </button>
+                        <button type="submit" name="preview" value="preview" class="button button--basic">
+                            {{ include('partials/icon.twig', {icon: 'edit', class: 'button__icon'}, with_context = false) }}
+                            <span class="button__text">{{ lang.preview }}</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+            <section class="section section--form compose__hidden-section compose__hidden-section--options">
+                <h2 class="title title--section">{{ lang.compose_options }}</h2>
+                <div class="section__container">
+                    <div class="row row--form field">
+                        <p class="option-field option-field--compact"><label><input type="checkbox" class="checkbox" name="options[signature]" value="1" tabindex="5"{% if sendpm.options.signature %} checked="checked"{% endif %} /> {{ lang.options_sig|raw }}</label></p>
+                        <p class="option-field option-field--compact"><label><input type="checkbox" class="checkbox" name="options[disablesmilies]" value="1" tabindex="6"{% if sendpm.options.disablesmilies %} checked="checked"{% endif %} /> {{ lang.options_disable_smilies|raw }}</label></p>
+                        <p class="option-field option-field--compact"><label><input type="checkbox" class="checkbox" name="options[savecopy]" value="1" tabindex="7"{% if sendpm.options.savecopy %} checked="checked"{% endif %} /> {{ lang.options_save_copy|raw }}</label></p>
+                        {% if mybb.usergroup.cantrackpms %}
+                            <p class="option-field option-field--compact"><label><input type="checkbox" class="checkbox" name="options[readreceipt]" value="1" tabindex="8"{% if sendpm.options.readreceipt %} checked="checked"{% endif %} /> {{ lang.options_read_receipt|raw }}</label></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+            <div class="form__submit">
+                <button type="submit" class="button button--big" name="submit" tabindex="4" accesskey="s">
+                    {{ include('partials/icon.twig', {icon: 'paper-plane', class: 'button__icon'}, with_context = false) }}
+                    <span class="button__text">{{ lang.send_message }}</span>
+                </button>
+            </div>
+        </div>
+        <input type="hidden" name="action" value="do_send" />
+        <input type="hidden" name="pmid" value="{{ sendpm.pmid }}" />
+        <input type="hidden" name="do" value="{{ sendpm.do }}" />
+    </form>
+    <script type="text/javascript">
+    <!--
+        if($("#bcc_area").length > 0 && $("#bcc").val() == "")
+        {
+            $("#bcc_area").css("display", "none");
+        }
+
+        function showBcc()
+        {
+            if($("#bcc_area").css("display") == 'none')
+            {
+                $("#bcc_area").css("display", "");
+            }
+            else
+            {
+                $("#bcc_area").css("display", "none");
+            }
+        }
+    // -->
+    </script>
+    {{ asset('jscripts/select2/select2.css', static=true) }}
+    {{ asset('jscripts/select2/select2.min.js', static=true) }}
+    <script type="text/javascript">
+    <!--
+    if({{ mybb.settings.use_xmlhttprequest }})
+    {
+        MyBB.select2();
+        $("#to").select2({
+            placeholder: "{{ lang.search_user }}",
+            minimumInputLength: 2,
+            maximumSelectionSize: function() {
+                if ({{ mybb.usergroup.maxpmrecipients }} == 0) {
+                    return 0;
+                }
+                return Math.max(1, {{ mybb.usergroup.maxpmrecipients }} - $("#bcc").select2('data').length);
+            },
+            multiple: true,
+            ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                url: "xmlhttp.php?action=get_users",
+                dataType: 'json',
+                data: function (term, page) {
+                    return {
+                        query: term, // search term
+                    };
+                },
+                results: function (data, page) { // parse the results into the format expected by Select2.
+                    // since we are using custom formatting functions we do not need to alter remote JSON data
+                    return {results: data};
+                }
+            },
+            initSelection: function(element, callback) {
+                var query = $(element).val().replace(', ', ',');
+                if (query !== "") {
+                    var newqueries = [];
+                    exp_queries = query.split(",");
+                    $.each(exp_queries, function(index, value ){
+                        if(value.replace(/\s/g, '') != "")
+                        {
+                            var newquery = {
+                                id: value.replace(/,\s?/g, ", "),
+                                text: value.replace(/,\s?/g, ", ")
+                            };
+                            newqueries.push(newquery);
+                        }
+                    });
+                    callback(newqueries);
+                }
+            }
+        })
+        .on("change", function(e) {
+            if ({{ mybb.usergroup.maxpmrecipients }} == 0)
+            {
+                return;
+            }
+
+            if (e.val.length >= {{ mybb.usergroup.maxpmrecipients }})
+            {
+                $("#bcc").select2("enable", false);
+            }
+            else
+            {
+                $("#bcc").select2("enable", true);
+            }
+        });
+
+        $("#bcc").select2({
+            placeholder: "{{ lang.search_user }}",
+            minimumInputLength: 2,
+            maximumSelectionSize: function() {
+                if ({{ mybb.usergroup.maxpmrecipients }} == 0) {
+                    return 0;
+                }
+                return Math.max(1, {{ mybb.usergroup.maxpmrecipients }} - $("#to").select2('data').length);
+            },
+            multiple: true,
+            ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                url: "xmlhttp.php?action=get_users",
+                dataType: 'json',
+                data: function (term, page) {
+                    return {
+                        query: term, // search term
+                    };
+                },
+                results: function (data, page) { // parse the results into the format expected by Select2.
+                    // since we are using custom formatting functions we do not need to alter remote JSON data
+                    return {results: data};
+                }
+            },
+            initSelection: function(element, callback) {
+                var query = $(element).val();
+                if (query !== "") {
+                    var newqueries = [];
+                    exp_queries = query.split(",");
+                    $.each(exp_queries, function(index, value ){
+                        if(value.replace(/\s/g, '') != "")
+                        {
+                            var newquery = {
+                                id: value.replace(/,\s?/g, ", "),
+                                text: value.replace(/,\s?/g, ", ")
+                            };
+                            newqueries.push(newquery);
+                        }
+                    });
+                    callback(newqueries);
+                }
+            }
+        })
+        .on("change", function(e) {
+            if ({{ mybb.usergroup.maxpmrecipients }} == 0)
+            {
+                return;
+            }
+
+            if (e.val.length >= {{ mybb.usergroup.maxpmrecipients }})
+            {
+                $("#to").select2("enable", false);
+            }
+            else
+            {
+                $("#to").select2("enable", true);
+            }
+        });
+    }
+    // -->
+    </script>
+{% endblock messengerBody %}
